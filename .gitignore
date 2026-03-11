@@ -1,0 +1,13 @@
+*
+!.gitignore
+!interactive-guides/
+!legal-aid-articles/
+!legal-aid-conditional-fields/
+!legal-aid-menu-icons/
+!legal-aid-nsmi-landing/
+!legal-aid-permalinks/
+!legal-aid-sidebars/
+!legal-aid-snippets/
+!legal-aid-tax-bread/
+!legal-aid-tax-bread-drupal-breadcrumbs/
+!pii-masker/

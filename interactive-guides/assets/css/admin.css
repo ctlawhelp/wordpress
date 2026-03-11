@@ -1,0 +1,41 @@
+#ig-step-builder {
+  margin-top: 10px;
+}
+.ig-step-card {
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+.ig-step-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+.ig-step-title {
+  width: 500px !important;
+  max-width: 100%;
+  font-size: 14px;
+  padding: 5px;
+}
+.ig-step-card textarea {
+  width: 100%;
+  min-height: 80px;
+  margin-top: 5px;
+}
+.ig-step-card select {
+  margin-left: 5px;
+}
+.ig-step-type-options {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+.ig-question-options {
+  display: none;
+}
+.ig-question-options.visible {
+  display: block;
+}
