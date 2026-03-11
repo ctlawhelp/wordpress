@@ -1,0 +1,97 @@
+/*
+ * =========================
+ * CTLawHelp Menu Icons System
+ * =========================
+ * 
+ * To control menu icon colors, add one of these classes to your menu container:
+ * 
+ * .menu-icons-white  - White icons (for dark backgrounds)
+ * .menu-icons-blue   - Blue icons (for light backgrounds)
+ * .menu-icons-dark   - Dark icons (for very light backgrounds)
+ * 
+ * Example: 
+ * <nav class="elementor-nav-menu--main menu-icons-white">
+ * 
+ * =========================
+ */
+
+/* =========================
+   Base icon positioning and styling
+   ========================= */
+a[style*="--icon-url"] {
+    position: relative;
+    padding-left: 3.2rem; /* Increased from 2.9rem to add ~5px more space */
+}
+
+/* More specific selector for Elementor menus */
+.menu-icons-white a[style*="--icon-url"],
+.elementor-nav-menu a[style*="--icon-url"],
+.has-menu-icon {
+    position: relative;
+    padding-left: 3.2rem !important; /* Force the padding with higher specificity */
+}
+
+a[style*="--icon-url"]::before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.7rem !important;
+    height: 1.7rem !important;
+    min-width: 1.7rem !important;
+    min-height: 1.7rem !important;
+    max-width: 1.7rem !important;
+    max-height: 1.7rem !important;
+
+    /* Icon mask */
+    mask: var(--icon-url) no-repeat center / contain;
+    -webkit-mask: var(--icon-url) no-repeat center / contain;
+    mask-size: contain !important;
+    -webkit-mask-size: contain !important;
+
+    /* Default: inherit text color */
+    background-color: currentColor;
+    opacity: 1;
+    flex-shrink: 0 !important; /* Prevent flexbox squishing */
+}
+
+/* =========================
+   Icon Color Control Classes
+   ========================= */
+
+/* White icons - for dark backgrounds */
+.menu-icons-white a[style*="--icon-url"]::before {
+    background-color: #ffffff !important;
+}
+
+/* Blue icons - for light backgrounds */
+.menu-icons-blue a[style*="--icon-url"]::before {
+    background-color: #29367C !important;
+}
+
+/* Dark icons - for very light backgrounds */
+.menu-icons-dark a[style*="--icon-url"]::before {
+    background-color: #333333 !important;
+}
+
+/* Custom color - use CSS variable */
+.menu-icons-custom a[style*="--icon-url"]::before {
+    background-color: var(--menu-icon-color, currentColor) !important;
+}
+
+/* =========================
+   Legacy Support (deprecated - use classes above instead)
+   ========================= */
+#headermenu a[style*="--icon-url"]::before {
+    background-color: #ffffff !important;
+}
+
+#sidebarmenu a[style*="--icon-url"]::before {
+    background-color: #29367C !important;
+}
+
+
+
+
+   

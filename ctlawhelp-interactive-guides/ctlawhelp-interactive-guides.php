@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Legal Guides
+ * Plugin Name: CTLawHelp Legal Guides
  * Description: Custom post type for Legal Guides with NSMI categories support and Interactive Guide builder.
  * Version: 1.1
  * Author: CTLawHelp

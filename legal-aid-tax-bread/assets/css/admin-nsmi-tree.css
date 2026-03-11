@@ -1,0 +1,113 @@
+/* Align toggle with checkbox/label */
+.nsmi-toggle {
+  font-weight: bold;
+  user-select: none;
+}
+
+/* Clean up NSMI category tree metabox styles */
+#nsmi-category-tree {
+  background: #fff;
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+#nsmi-category-tree ul.nsmi-tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+#nsmi-category-tree li {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+}
+#nsmi-category-tree > ul > li {
+  margin-top: 16px !important;
+}
+#nsmi-category-tree label {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  display: inline-block;
+  width: auto;
+  font-weight: inherit;
+  color: #222;
+  background: none;
+  padding: 2px 0;
+  letter-spacing: 5px;
+}
+#nsmi-category-tree input[type="checkbox"],
+#nsmi-category-tree input[type="radio"] {
+  margin-right: 6px;
+  vertical-align: middle;
+}
+#nsmi-category-tree .primary-radio {
+  margin-left: 12px;
+  padding-left: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.nsmi-tree-children {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left: none !important;
+}
+/* Bold top-level categories only */
+#nsmi-category-tree > ul > li > label {
+  font-weight: bold;
+}
+#nsmi-category-tree label[style*="font-weight:bold"] {
+  margin-top: 16px !important;
+  display: block;
+}
+/* Remove unwanted WP admin box shadow and background */
+#nsmi_category_custom.postbox {
+  box-shadow: none !important;
+  background: #f9f9f9 !important;
+  border: 1px solid #e5e5e5 !important;
+}
+/* Remove WP admin metabox padding */
+#nsmi_category_custom .inside {
+  padding: 0 !important;
+}
+/* Override WP admin metabox padding for NSMI box */
+.edit-post-meta-boxes-area #nsmi_category_custom.postbox > .inside {
+    padding: 0 !important;
+}
+
+/* Override all WP admin metabox .inside padding in side area */
+.edit-post-meta-boxes-area .postbox > .inside {
+    padding: 0 !important;
+}
+
+/* Maximum specificity to override WP admin metabox padding */
+body.edit-post-php .edit-post-meta-boxes-area .postbox > .inside,
+body.post-php .edit-post-meta-boxes-area .postbox > .inside {
+    padding: 0 !important;
+}
+.edit-post-meta-boxes-area .postbox>.inside {
+    color: inherit;
+    margin: 0;
+    padding: 0 !important;
+}
+
+/* Force override of WP admin metabox .inside padding */
+.edit-post-meta-boxes-area .postbox#nsmi_category_custom > .inside {
+    padding: 0 !important;
+}
+.edit-post-meta-boxes-area #nsmi-category-tree label {
+  letter-spacing: 0.2px !important;
+}
+
+/* Highlight category label on hover and when selected as primary */
+#nsmi-category-tree label.primary-highlight {
+  background: #ffe066 !important;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+#nsmi-category-tree label:hover {
+  background: #fff3cd;
+}

@@ -1,0 +1,67 @@
+/* =========================
+   NSMI GRID (scoped styles)
+   ========================= */
+.nsmi-grid-wrap { width: 100%; }
+
+/* Layout */
+.nsmi-grid-wrap .nsmi-grid { display: grid; gap: 16px; }
+
+/* Column presets (desktop) */
+.nsmi-grid-wrap .nsmi-cols-1 { grid-template-columns: 1fr; }
+.nsmi-grid-wrap .nsmi-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.nsmi-grid-wrap .nsmi-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.nsmi-grid-wrap .nsmi-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Responsive breaks */
+@media (max-width: 980px) {
+  .nsmi-grid-wrap .nsmi-cols-3,
+  .nsmi-grid-wrap .nsmi-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .nsmi-grid-wrap .nsmi-grid { grid-template-columns: 1fr; }
+}
+
+/* Card */
+.nsmi-grid-wrap .nsmi-grid-card {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
+  align-items: start;
+  text-decoration: none;
+  color: inherit;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.nsmi-grid-wrap .nsmi-grid-card:hover { background: #eef2f7; }
+
+/* --- ICONS (mask paint in CTL blue #002087, only when URL present) --- */
+
+/* Base media box + normal <img> rendering */
+.nsmi-grid-wrap .nsmi-grid-media { width: 56px; height: 56px; }
+.nsmi-grid-wrap .nsmi-grid-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Paint via mask ONLY when --icon-url exists */
+.nsmi-grid-wrap .nsmi-grid-media[style*="--icon-url"] {
+  background-color: #002087; /* CTL blue */
+  -webkit-mask-image: var(--icon-url);
+          mask-image: var(--icon-url);
+  -webkit-mask-repeat: no-repeat;      mask-repeat: no-repeat;
+  -webkit-mask-position: center;       mask-position: center;
+  -webkit-mask-size: contain;          mask-size: contain;
+}
+
+/* Hide the raw <img> only when masking */
+.nsmi-grid-wrap .nsmi-grid-media[style*="--icon-url"] img {
+  display: none !important;
+}
+
+/* Text */
+.nsmi-grid-wrap .nsmi-grid-title { margin: 2px 0 6px; font-size: 20px; font-weight: 800; line-height: 1.2; }
+.nsmi-grid-wrap .nsmi-grid-desc  { margin: 0; color: #374151; font-size: 15px; line-height: 1.45; }

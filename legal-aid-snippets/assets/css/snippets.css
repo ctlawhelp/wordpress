@@ -1,0 +1,77 @@
+/**
+ * Legal Aid Snippets - Frontend Styles
+ */
+
+.legal-snippet {
+    margin: 0;
+    padding: 0;
+}
+
+/* Legal Aid Snippet headline size and spacing when in elementor shortcode */
+.legal-snippet h3 {
+  font-size: 21px;
+	
+}
+.legal-snippet p:empty {
+  display: none;
+}
+.legal-snippet h3 {
+  margin-top: 0;
+}
+
+.legal-snippet .wp-block-heading {
+  margin-top: -12px;
+}
+
+.legal-snippet p:first-child {
+    margin-top: 0;
+}
+
+.legal-snippet p:last-child {
+    margin-bottom: 0;
+}
+
+/* Snippet error messages (only visible to admins) */
+.snippet-error {
+    background: #ffebee !important;
+    border: 1px solid #f44336 !important;
+    padding: 10px !important;
+    color: #c62828 !important;
+    margin: 1em 0 !important;
+    border-radius: 4px;
+}
+
+/* Common snippet styling classes you can use */
+.legal-snippet.highlight {
+    background: #f0f8ff;
+    border-left: 4px solid #0073aa;
+    padding: 15px;
+    margin: 1.5em 0;
+}
+
+.legal-snippet.contact-info {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.legal-snippet.contact-info h3,
+.legal-snippet.contact-info h4 {
+    margin-top: 0;
+    color: #0073aa;
+}
+
+.legal-snippet.warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 15px;
+    border-radius: 4px;
+    color: #856404;
+}
+
+.legal-snippet.warning h3,
+.legal-snippet.warning h4 {
+    color: #856404;
+    margin-top: 0;
+}

@@ -1,0 +1,47 @@
+/**
+ * Legal Aid Sidebars - Content-based sidebar styles
+ */
+
+.laa-sidebar-content {
+    /* Container for content-based sidebars */
+    width: 100%;
+}
+
+.laa-sidebar-content h2,
+.laa-sidebar-content h3,
+.laa-sidebar-content h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.laa-sidebar-content p {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.laa-sidebar-content ul,
+.laa-sidebar-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.laa-sidebar-content li {
+    margin-bottom: 0.5rem;
+}
+
+.laa-sidebar-content a {
+    color: #007cba;
+    text-decoration: none;
+}
+
+.laa-sidebar-content a:hover {
+    text-decoration: underline;
+}
+
+/* Ensure content-based sidebars match widget styling */
+.laa-sidebar-content .wp-block-group,
+.laa-sidebar-content .wp-block-columns {
+    margin-bottom: 1.5rem;
+}

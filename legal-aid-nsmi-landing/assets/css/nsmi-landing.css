@@ -1,0 +1,132 @@
+/* Layout: sidebar + main */
+.nsmi-landing-wrap {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+.nsmi-landing-sidebar {
+  position: sticky;
+  top: 2rem;
+}
+.nsmi-landing-intro { margin-bottom: 1rem; }
+
+
+/* HTML block  top */
+.nsmi-landing-above { margin: 1rem 0 1.25rem; }
+.nsmi-sb .nsmi-sb-header .nsmi-sb-icon { width: 28px; height: 28px; }
+.nsmi-sb .nsmi-sb-desc { margin:.35rem 0 1rem; color:#444; }
+.laa-acc-footer { margin: 8px 4px 2px; }
+.laa-acc-showall { display:inline-block; font-weight:600; text-decoration:none; }
+
+
+
+/* Accordion basics */
+.laa-nsmi-accordion details {
+  background: #fff;
+  padding: .5rem 1rem;
+  margin-bottom: .75rem;
+}
+
+/* top level acc button blue */
+.laa-acc-summary {
+  cursor: pointer;
+  background-color: #002087;
+  border-radius: 6px;
+  color: #fff;
+  width: 100%;
+  padding: 14px;
+  font-weight: 600;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+
+}
+.laa-badge {
+  display: inline-block;
+  font-size: .75rem;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: .05rem .4rem;
+  border-radius: 999px;
+}
+.laa-acc-list {
+  list-style: none;
+  margin: .5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: .5rem;
+}
+.laa-acc-item-row {
+
+}
+.laa-acc-item-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.laa-acc-link {
+  font-weight: 600;
+  text-decoration: none;
+}
+.laa-acc-excerpt { margin: .25rem 0 0; color: #444; }
+.laa-chip {
+  display: inline-block;
+  font-size: .7rem;
+  margin-left: .25rem;
+  padding: .05rem .35rem;
+  border: 1px solid #d1d5db;
+  border-radius: .35rem;
+  background: #f9fafb;
+}
+
+
+/* Featured (Pinned) block */
+.laa-featured-heading { font-size: 20px; font-weight: 800; margin: 0 0 8px; }
+.laa-featured-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.laa-featured-card { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: start; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; }
+.laa-featured-thumb { width: 96px; height: 72px; object-fit: cover; border-radius: 8px; }
+.laa-featured-title { font-size: 16px; margin: 2px 0 4px; }
+.laa-featured-excerpt { margin: 0; color: #374151; }
+@media (min-width: 760px) {
+  .laa-featured-grid { grid-template-columns: repeat(3, 1fr); }
+  .laa-featured-card { grid-template-columns: 1fr; }
+  .laa-featured-thumb { width: 100%; height: 140px; }
+}
+
+/* Dynamic Icon Styles */
+.nsmi-dynamic-icon img {
+  width: 64px !important;  /* Make it larger */
+  height: 64px !important;
+  filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(213deg) brightness(104%) contrast(97%); /* Blue color */
+}
+
+/* Alternative sizes */
+.nsmi-dynamic-icon.large img {
+  width: 80px !important;
+  height: 80px !important;
+}
+
+.nsmi-dynamic-icon.small img {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+/* If you want a specific blue color, use this instead */
+.nsmi-dynamic-icon img {
+  width: 64px !important;
+  height: 64px !important;
+  filter: brightness(0) saturate(100%) invert(40%) sepia(100%) saturate(1000%) hue-rotate(200deg); /* Adjust blue tone */
+}
+
+/* Add to your nsmi-landing.css */
+.nsmi-dynamic-icon img {
+  width: 64px !important;
+  height: 64px !important;
+  filter: brightness(0) saturate(100%) invert(8%) sepia(100%) saturate(4490%) hue-rotate(225deg) brightness(91%) contrast(106%);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .nsmi-landing-wrap { grid-template-columns: 1fr; }
+  .nsmi-landing-sidebar { position: static; }
+}

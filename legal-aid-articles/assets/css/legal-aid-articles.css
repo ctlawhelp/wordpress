@@ -1,0 +1,54 @@
+/* NSMI Icon Upload Styles */
+.nsmi-icon-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nsmi-icon-wrapper .button {
+    align-self: flex-start;
+}
+
+.nsmi-icon-preview img {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px;
+    background: #fff;
+    max-width: 80px;
+    height: auto;
+}
+.nsmi-subcategories li { margin-bottom: 5px; }
+.nsmi-subcategories a {
+    text-decoration: none;
+    color: #0073aa;
+}
+.nsmi-subcategories a:hover {
+    text-decoration: underline;
+    color: #005177;
+}
+
+
+/* Style the NSMI taxonomy checklist in the article editor */
+
+/* Hide nested lists by default (collapsed) */
+#nsmi-all ul.children {
+  display: none;
+  margin-left: 15px;
+  border-left: 1px dotted #ccc;
+  padding-left: 10px;
+}
+
+/* Expand/collapse toggle icon */
+.nsmi-toggle {
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 6px;
+  color: #0073aa;
+}
+.nsmi-toggle::after {
+  content: "▸"; /* right arrow */
+}
+.nsmi-toggle.expanded::after {
+  content: "▾"; /* down arrow */
+}
+
