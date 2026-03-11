@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: PII Masker
+ * Plugin Name: CTLawHelp PII Masker
  * Description: Masks selected PII fields in Gravity Forms entries after a delay. Supports multiple forms, each with its own input IDs. Logs (optional) to uploads/PII-mask-debug.log.
  * Version: 2.3.0
  * Author: Kate Frank

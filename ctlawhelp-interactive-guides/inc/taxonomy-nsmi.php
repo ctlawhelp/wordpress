@@ -9,7 +9,7 @@ function ig_register_nsmi_taxonomy() {
         // If it exists, just register it for our post type
         register_taxonomy_for_object_type( 'nsmi_category', 'interactive_guide' );
     } else {
-        // If it doesn't exist, create it (but legal-aid-articles should handle this)
+        // If it doesn't exist, create it (but ctlawhelp-legal-aid-articles should handle this)
         register_taxonomy( 'nsmi_category', [ 'interactive_guide', 'legal_article', 'post' ], [
             'hierarchical'      => true,
             'labels'            => [

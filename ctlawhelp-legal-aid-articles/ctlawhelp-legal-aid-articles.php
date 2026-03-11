@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Legal Aid Articles
+ * Plugin Name: CTLawHelp Legal Aid Articles
  * Description: Custom post type, taxonomy, icons, shortcodes, and admin UI for Legal Aid Articles.
  * Version: 1.4
  * Author: CTLawHelp

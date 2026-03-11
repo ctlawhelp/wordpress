@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Legal Aid Permalinks
+ * Plugin Name: CTLawHelp Permalinks
  * Description: Multilingual custom permalink manager with Polylang integration, per-post overrides, global redirect management, and automatic language prefix handling.
  * Version: 1.0.7
  * Author: CTLawHelp

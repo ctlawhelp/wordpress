@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Legal Aid Tax Bread – Drupal Breadcrumb Overrides
+ * Plugin Name: CTLawHelp Tax Bread – Drupal Breadcrumb Overrides
  * Description: Temporarily rewrites NSMI breadcrumb links (Yoast) to point at ctlawhelp.org Drupal self-help section IDs.
  * Version: 0.1.0
  * Author: CTLawHelp

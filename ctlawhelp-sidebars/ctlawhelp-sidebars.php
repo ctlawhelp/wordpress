@@ -1,17 +1,18 @@
 <?php
 /**
- * Plugin Name: Legal Aid Sidebars
+ * Plugin Name: CTLawHelp Sidebars
  * Description: Advanced sidebar management for NSMI landing pages. Requires Legal Aid Articles.
  * Version: 1.0.0
  * Author: CTLawHelp
- * Requires Plugins: legal-aid-articles
+ * Requires Plugins: ctlawhelp-legal-aid-articles
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Check if required plugin is active
 function las_check_dependencies() {
-    if ( ! is_plugin_active( 'legal-aid-articles/legal-aid-articles.php' ) ) {
+    if ( ! is_plugin_active( 'ctlawhelp-legal-aid-articles/ctlawhelp-legal-aid-articles.php' )
+         ) {
         add_action( 'admin_notices', 'las_dependency_notice' );
         return false;
     }

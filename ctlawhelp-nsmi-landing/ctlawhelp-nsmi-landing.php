@@ -1,20 +1,20 @@
 <?php
 /**
- * Plugin Name: Legal Aid NSMI Landing
+ * Plugin Name: CTLawHelp NSMI Landing
  * Description: NSMI landing page functionality for legal articles. Requires Legal Aid Articles and Legal Aid Sidebars.
  * Version: 1.0.0
  * Author: CTLawHelp
- * Requires Plugins: legal-aid-articles, legal-aid-sidebars
+ * Requires Plugins: ctlawhelp-legal-aid-articles, ctlawhelp-sidebars
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Check if required plugins are active
 function latb_nsmi_landing_check_dependencies() {
-    $dependencies = [
-        'legal-aid-articles/legal-aid-articles.php' => 'Legal Aid Articles',
-        'legal-aid-sidebars/legal-aid-sidebars.php' => 'Legal Aid Sidebars'
-    ];
+  $dependencies = [
+    'ctlawhelp-legal-aid-articles/ctlawhelp-legal-aid-articles.php' => 'Legal Aid Articles',
+    'ctlawhelp-sidebars/ctlawhelp-sidebars.php' => 'Legal Aid Sidebars'
+];
 
     $missing = [];
     foreach ($dependencies as $plugin => $name) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Legal Aid Menu Icons
+ * Plugin Name: CTLawHelp Menu Icons
  * Plugin URI: https://ctlawhelp.org
  * Description: Add image icons to WordPress navigation menu items with CSS variable support. Includes optional NSMI taxonomy integration.
  * Version: 2.0.0

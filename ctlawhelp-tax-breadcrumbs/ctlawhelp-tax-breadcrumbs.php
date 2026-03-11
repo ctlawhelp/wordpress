@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: Legal Aid Tax Bread
+ * Plugin Name: CTLawHelp Tax Bread
  * Description: Minimal NSMI taxonomy and breadcrumb functionality with Elementor protection.
  * Version: 1.4
  * Author: CTLawHelp
- * Requires Plugins: legal-aid-articles
+ * Requires Plugins: ctlawhelp-legal-aid-articles
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -14,7 +14,7 @@ define( 'LATB_URL',  plugin_dir_url( __FILE__ ) );
 
 // Check for required plugin dependency
 function latb_check_dependency() {
-    if (!is_plugin_active('legal-aid-articles/legal-aid-articles.php')) {
+    if (!is_plugin_active('ctlawhelp-legal-aid-articles/ctlawhelp-legal-aid-articles.php')) {
         add_action('admin_notices', 'latb_dependency_notice');
         // Deactivate this plugin
         deactivate_plugins(plugin_basename(__FILE__));

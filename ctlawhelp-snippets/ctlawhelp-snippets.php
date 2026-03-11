@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Legal Aid Snippets
+ * Plugin Name: CTLawHelp Snippets
  * Description: Reusable content snippets for legal aid websites. Create once, use everywhere.
  * Version: 1.0
  * Author: CTLawHelp
