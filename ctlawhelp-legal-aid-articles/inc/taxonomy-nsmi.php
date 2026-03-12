@@ -1,19 +1,5 @@
 <?php
-function laa_register_nsmi_taxonomy() {
-    register_taxonomy( 'nsmi_category', [ 'legal_article', 'post', 'interactive_guide' ], [
-        'hierarchical'      => true,
-        'labels'            => [
-            'name'          => __( 'NSMI Categories', 'ctlawhelp' ),
-            'singular_name' => __( 'NSMI Category', 'ctlawhelp' ),
-            'menu_name'     => __( 'Categories', 'ctlawhelp' ),
-        ],
-        'show_ui'           => true,
-        'show_admin_column' => true,
-        'rewrite'           => [ 'slug' => 'nsmi' ],
-        'show_in_rest'      => true,
-        'show_in_menu'      => false, // Don't show in default location
-    ]);
-}
+// nsmi_category taxonomy registration moved to ctlawhelp-core/inc/taxonomy-nsmi.php
 
 // Create custom top-level NSMI menu
 add_action('admin_menu', function() {
@@ -110,4 +96,4 @@ function nsmi_management_dashboard() {
     </div>
     <?php
 }
-add_action( 'init', 'laa_register_nsmi_taxonomy', 1 );
+// (init hook for laa_register_nsmi_taxonomy removed — now in ctlawhelp-core)
