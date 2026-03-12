@@ -13,9 +13,9 @@ if ( ! defined( 'DISABLE_LEGAL_PERMALINKS' ) ) {
     define( 'DISABLE_LEGAL_PERMALINKS', false );
 }
 
-// Debug mode - set to true to enable debugging
+// Debug mode
 if ( ! defined( 'LEGAL_PERMALINKS_DEBUG' ) ) {
-    define( 'LEGAL_PERMALINKS_DEBUG', true );
+    define( 'LEGAL_PERMALINKS_DEBUG', false );
 }
 
 // Disable interactive guide custom permalinks if needed
@@ -111,17 +111,19 @@ class LegalPermalinks {
             sort($old_tt_ids);
             if ($tt_ids !== $old_tt_ids) {
                 self::$needs_flush = true;
+                $this->invalidate_rules_cache();
             }
         } else {
             // For other cases, only flush if post has custom permalinks
             $has_custom = get_post_meta($object_id, '_legal_custom_path', true);
             $has_redirects = get_post_meta($object_id, '_legal_redirect_paths', true);
-            
+
             if ($has_custom || (!empty($has_redirects) && is_array($has_redirects))) {
                 sort($tt_ids);
                 sort($old_tt_ids);
                 if ($tt_ids !== $old_tt_ids) {
                     self::$needs_flush = true;
+                    $this->invalidate_rules_cache();
                 }
             }
         }
@@ -149,6 +151,7 @@ class LegalPermalinks {
             $post_type = get_post_type($post_id);
             if (in_array($post_type, ['legal_article', 'interactive_guide'], true)) {
                 self::$needs_flush = true;
+                $this->invalidate_rules_cache();
                 if (!wp_next_scheduled('legal_permalinks_flush_rules')) {
                     wp_schedule_single_event(time() + 3, 'legal_permalinks_flush_rules');
                 }
@@ -162,13 +165,15 @@ class LegalPermalinks {
         // Flush for legal content (automatic URLs) or posts with custom settings
         if (in_array($post_type, ['legal_article', 'interactive_guide'], true)) {
             self::$needs_flush = true;
+            $this->invalidate_rules_cache();
         } else {
             // For other post types, only flush if they have custom permalinks
             $has_custom = get_post_meta($post_id, '_legal_custom_path', true);
             $has_redirects = get_post_meta($post_id, '_legal_redirect_paths', true);
-            
+
             if ($has_custom || (!empty($has_redirects) && is_array($has_redirects))) {
                 self::$needs_flush = true;
+                $this->invalidate_rules_cache();
             }
         }
     }
@@ -242,7 +247,8 @@ class LegalPermalinks {
             update_post_meta($post_id, '_legal_redirect_paths', $lines);
         }
 
-        // Force immediate flush for new URL system
+        // Invalidate cache and schedule a rebuild
+        $this->invalidate_rules_cache();
         if (!wp_next_scheduled('legal_permalinks_flush_rules')) {
             wp_schedule_single_event(time() + 1, 'legal_permalinks_flush_rules');
         }
@@ -368,123 +374,118 @@ class LegalPermalinks {
 
     /** ---------- Rewrite Rules ---------- */
     public function add_rewrite_rules() {
-        // Check if post types exist
-        $legal_article_exists = post_type_exists('legal_article');
-        $interactive_guide_exists = post_type_exists('interactive_guide');
+        // Load from cache; rebuild and store on miss.
+        $map = get_option( 'legal_permalinks_rules_map', null );
+        if ( $map === null ) {
+            $map = $this->build_rules_map();
+            update_option( 'legal_permalinks_rules_map', $map, false ); // false = don't autoload
+        }
 
-        // Handle posts with manual custom paths (NOT just redirects)
+        foreach ( $map as $regex => $query ) {
+            add_rewrite_rule( $regex, $query, 'top' );
+        }
+
+        // Always register the tag — it is cheap and must be present on every request.
+        add_rewrite_tag( '%legal_redirect_to%', '([0-9]+)' );
+    }
+
+    /** ---------- Build Rules Map (expensive — only called on cache miss) ---------- */
+    private function build_rules_map() {
+        $map = [];
+
         global $wpdb;
+
+        // Posts with manual custom paths
         $custom_posts = $wpdb->get_results(
             "SELECT p.ID, p.post_name, p.post_type
-             FROM {$wpdb->posts} p 
-             INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id 
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
              WHERE pm.meta_key = '_legal_custom_path' AND pm.meta_value != ''
              AND p.post_status = 'publish'"
         );
-        
-        // Also get posts with redirects (for processing redirects separately)
+
+        // Posts with redirect paths
         $posts_with_redirects = $wpdb->get_results(
             "SELECT p.ID
-             FROM {$wpdb->posts} p 
-             INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id 
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
              WHERE pm.meta_key = '_legal_redirect_paths' AND pm.meta_value != '' AND pm.meta_value != 'a:0:{}'
              AND p.post_status = 'publish'"
         );
-        
-        // Also handle all legal articles, interactive guides, and regular posts for automatic URLs
+
+        // All legal content for automatic taxonomy-based URLs
         $legal_posts = get_posts([
             'post_type'   => ['legal_article', 'interactive_guide', 'post', 'nsmi_landing'],
             'numberposts' => -1,
-            'post_status' => 'publish'
+            'post_status' => 'publish',
         ]);
 
-        
-        // Process manual custom paths first
-        foreach ($custom_posts as $post_data) {
-            $post = get_post($post_data->ID);
-            if (!$post) continue;
+        // Manual custom paths
+        foreach ( $custom_posts as $post_data ) {
+            $post = get_post( $post_data->ID );
+            if ( ! $post ) continue;
 
-            $custom = get_post_meta($post->ID, '_legal_custom_path', true);
-            if ($custom) {
-                $clean_path = trim($custom, '/');
-                
-                // Create query string based on post type
-                $query_string = '';
-                if ($post->post_type === 'post') {
-                    $query_string = 'index.php?name=' . $post->post_name;
-                } elseif ($post->post_type === 'legal_article') {
-                    $query_string = 'index.php?post_type=legal_article&name=' . $post->post_name;
-                } elseif ($post->post_type === 'interactive_guide') {
-                    $query_string = 'index.php?post_type=interactive_guide&name=' . $post->post_name;
-                } else {
-                    $query_string = 'index.php?p=' . $post->ID;
-                }
-                
-                // Add rewrite rule WITHOUT language prefix (for direct legacy URLs)
-                $regex_no_lang = '^' . $clean_path . '/?$';
-                add_rewrite_rule($regex_no_lang, $query_string, 'top');
-                
-                // Add rewrite rule WITH language prefix (for Polylang compatibility)
-                if (function_exists('pll_languages_list')) {
-                    $languages = pll_languages_list();
-                    foreach ($languages as $lang) {
-                        $regex_with_lang = '^' . $lang . '/' . $clean_path . '/?$';
-                        add_rewrite_rule($regex_with_lang, $query_string, 'top');
-                    }
-                }
-                
+            $custom = get_post_meta( $post->ID, '_legal_custom_path', true );
+            if ( ! $custom ) continue;
 
-            }
-        }
-        
-        // Process redirects for ALL posts (including those without custom paths)
-        $all_redirect_ids = wp_list_pluck($posts_with_redirects, 'ID');
-        foreach ($all_redirect_ids as $post_id) {
-            $redirects = (array) get_post_meta($post_id, '_legal_redirect_paths', true);
-            foreach ($redirects as $rpath) {
-                if (trim($rpath) === '') continue;
-                $regex = '^' . trim($rpath, '/') . '/?$';
-                add_rewrite_rule($regex, 'index.php?legal_redirect_to=' . $post_id, 'top');
-            }
-        }
-        
-        // Process automatic taxonomy-based URLs for legal content
-        $processed_ids = wp_list_pluck($custom_posts, 'ID'); // Skip ONLY ones with custom paths
-        
-        foreach ($legal_posts as $post) {
-            if (in_array($post->ID, $processed_ids)) {
-                continue; // Skip if has manual path
-            }
-            
-            $auto_path = $this->build_automatic_path($post);
-            
-            if (!$auto_path) {
-                continue;
-            }
-            
-            $regex = '^' . trim($auto_path, '/') . '/?$';
-            
-            // Use different query params based on post type for better compatibility
-            if ($post->post_type === 'interactive_guide') {
+            $clean_path = trim( $custom, '/' );
+
+            if ( $post->post_type === 'post' ) {
+                $query_string = 'index.php?name=' . $post->post_name;
+            } elseif ( $post->post_type === 'legal_article' ) {
+                $query_string = 'index.php?post_type=legal_article&name=' . $post->post_name;
+            } elseif ( $post->post_type === 'interactive_guide' ) {
                 $query_string = 'index.php?post_type=interactive_guide&name=' . $post->post_name;
-                add_rewrite_rule($regex, $query_string, 'top');
-                
-                // Debug logging for interactive guides (temporarily disabled)
-                if (defined('LEGAL_PERMALINKS_DEBUG') && LEGAL_PERMALINKS_DEBUG) {
-                    // error_log("Legal Permalinks: Added rewrite rule for interactive_guide");
-                    // error_log("  - Pattern: $regex");
-                    // error_log("  - Query: $query_string");
-                    // error_log("  - Post: {$post->post_title} (ID: {$post->ID})");
-                    // error_log("  - Auto Path: $auto_path");
-                }
-            } elseif ($post->post_type === 'post') {
-                add_rewrite_rule($regex, 'index.php?name=' . $post->post_name, 'top');
             } else {
-                add_rewrite_rule($regex, 'index.php?post_type=' . $post->post_type . '&name=' . $post->post_name, 'top');
+                $query_string = 'index.php?p=' . $post->ID;
+            }
+
+            // Without language prefix (legacy/direct URLs)
+            $map[ '^' . $clean_path . '/?$' ] = $query_string;
+
+            // With language prefix (Polylang)
+            if ( function_exists( 'pll_languages_list' ) ) {
+                foreach ( pll_languages_list() as $lang ) {
+                    $map[ '^' . $lang . '/' . $clean_path . '/?$' ] = $query_string;
+                }
             }
         }
 
-        add_rewrite_tag('%legal_redirect_to%', '([0-9]+)');
+        // Redirect paths
+        $all_redirect_ids = wp_list_pluck( $posts_with_redirects, 'ID' );
+        foreach ( $all_redirect_ids as $post_id ) {
+            $redirects = (array) get_post_meta( $post_id, '_legal_redirect_paths', true );
+            foreach ( $redirects as $rpath ) {
+                if ( trim( $rpath ) === '' ) continue;
+                $map[ '^' . trim( $rpath, '/' ) . '/?$' ] = 'index.php?legal_redirect_to=' . $post_id;
+            }
+        }
+
+        // Automatic taxonomy-based URLs (skip posts that already have a custom path)
+        $processed_ids = wp_list_pluck( $custom_posts, 'ID' );
+        foreach ( $legal_posts as $post ) {
+            if ( in_array( $post->ID, $processed_ids ) ) continue;
+
+            $auto_path = $this->build_automatic_path( $post );
+            if ( ! $auto_path ) continue;
+
+            $regex = '^' . trim( $auto_path, '/' ) . '/?$';
+
+            if ( $post->post_type === 'interactive_guide' ) {
+                $map[ $regex ] = 'index.php?post_type=interactive_guide&name=' . $post->post_name;
+            } elseif ( $post->post_type === 'post' ) {
+                $map[ $regex ] = 'index.php?name=' . $post->post_name;
+            } else {
+                $map[ $regex ] = 'index.php?post_type=' . $post->post_type . '&name=' . $post->post_name;
+            }
+        }
+
+        return $map;
+    }
+
+    /** ---------- Invalidate Rules Cache ---------- */
+    private function invalidate_rules_cache() {
+        delete_option( 'legal_permalinks_rules_map' );
     }
 
     /** ---------- Redirect Handler ---------- */
@@ -568,6 +569,7 @@ class LegalPermalinks {
 
     /** ---------- Scheduled Flush ---------- */
     public function scheduled_flush() {
+        $this->invalidate_rules_cache();
         $this->add_rewrite_rules();
         flush_rewrite_rules(false);
     }
@@ -580,6 +582,7 @@ class LegalPermalinks {
         $redirects = array_filter(array_map('trim', explode("\n", $_POST['redirects'])));
         update_post_meta($post_id, '_legal_custom_path', $custom);
         update_post_meta($post_id, '_legal_redirect_paths', $redirects);
+        $this->invalidate_rules_cache();
         if (!wp_next_scheduled('legal_permalinks_flush_rules')) {
             wp_schedule_single_event(time() + 3, 'legal_permalinks_flush_rules');
         }
@@ -690,9 +693,10 @@ class LegalPermalinks {
             wp_send_json_error('Insufficient permissions');
         }
         
-        // Regenerate our custom rewrite rules
+        // Invalidate cache so add_rewrite_rules() does a fresh rebuild
+        $this->invalidate_rules_cache();
         $this->add_rewrite_rules();
-        
+
         // Flush WordPress rewrite rules
         flush_rewrite_rules(true);
         
@@ -705,6 +709,7 @@ class LegalPermalinks {
 
 /** Activation/Deactivation Hooks */
 function legal_permalinks_activate() {
+    delete_option( 'legal_permalinks_rules_map' );
     (new LegalPermalinks())->add_rewrite_rules();
     flush_rewrite_rules();
 }
