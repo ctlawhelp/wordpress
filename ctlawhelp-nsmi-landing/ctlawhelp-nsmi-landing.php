@@ -7,6 +7,14 @@
  * Requires Plugins: ctlawhelp-legal-aid-articles, ctlawhelp-sidebars
  */
 
+// Flush rewrite rules on plugin activation to register CPT permalinks
+register_activation_hook(__FILE__, function() {
+    if (function_exists('lal_register_nsmi_landing_cpt')) {
+        lal_register_nsmi_landing_cpt();
+    }
+    flush_rewrite_rules();
+});
+
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Check if required plugins are active
@@ -58,6 +66,7 @@ require_once plugin_dir_path( __FILE__ ) . 'inc/nsmi-page-html-above.php';
 require_once plugin_dir_path( __FILE__ ) . 'inc/shortcode-laa-nsmi-accordion.php';
 require_once plugin_dir_path( __FILE__ ) . 'inc/shortcode-laa-nsmi-featured.php';
 require_once plugin_dir_path( __FILE__ ) . 'inc/shortcode-laa-nsmi-grid.php';
+require_once plugin_dir_path(__FILE__) . 'inc/nsmi-landing-cpt.php';
 
 // Enqueue NSMI landing styles
 function lal_enqueue_assets() {

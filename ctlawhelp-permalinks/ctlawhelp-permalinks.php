@@ -131,7 +131,7 @@ class LegalPermalinks {
         $post_type = get_post_type($post_id);
         
         // Only flush for supported post types
-        if (!in_array($post_type, ['post', 'page', 'legal_article', 'interactive_guide'], true)) {
+        if (!in_array($post_type, ['post', 'page', 'legal_article', 'interactive_guide', 'nsmi_landing'], true)) {
             return;
         }
         
@@ -393,7 +393,7 @@ class LegalPermalinks {
         
         // Also handle all legal articles, interactive guides, and regular posts for automatic URLs
         $legal_posts = get_posts([
-            'post_type'   => ['legal_article', 'interactive_guide', 'post'],
+            'post_type'   => ['legal_article', 'interactive_guide', 'post', 'nsmi_landing'],
             'numberposts' => -1,
             'post_status' => 'publish'
         ]);
