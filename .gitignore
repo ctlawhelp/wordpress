@@ -2,6 +2,7 @@
 !/.gitignore
 !/plugins.code-workspace
 !/index.php
+!/ARCHITECTURE.md
 
 !/ctlawhelp-interactive-guides/
 !/ctlawhelp-interactive-guides/**
