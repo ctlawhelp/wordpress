@@ -84,6 +84,23 @@ add_action('add_meta_boxes', function() {
 });
 
 /**
+ * Add sidebar assignment meta box to nsmi_landing CPT.
+ * Hooked via nsmi_landing_add_side_meta_boxes so nsmi-landing plugin
+ * does not directly reference this function — if this plugin is
+ * deactivated, the hook simply fires with no listeners and no error.
+ */
+add_action( 'nsmi_landing_add_side_meta_boxes', function( $post_type ) {
+    add_meta_box(
+        'laa_sidebar_assignment',
+        __('Sidebar Assignment', 'laa'),
+        'laa_sidebar_assignment_meta_box',
+        $post_type,
+        'side',
+        'default'
+    );
+});
+
+/**
  * Render the sidebar assignment meta box
  */
 function laa_sidebar_assignment_meta_box($post) {

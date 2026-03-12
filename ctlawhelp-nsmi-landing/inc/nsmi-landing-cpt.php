@@ -88,15 +88,8 @@ add_action('add_meta_boxes', function() {
 		'high'
 	);
 
-	// Sidebar Assignment (reuse logic)
-	add_meta_box(
-		'laa_sidebar_assignment',
-		__('Sidebar Assignment', 'laa'),
-		'laa_sidebar_assignment_meta_box',
-		'nsmi_landing',
-		'side',
-		'default'
-	);
+	// Sidebar Assignment — sidebars plugin hooks in here if active
+	do_action( 'nsmi_landing_add_side_meta_boxes', 'nsmi_landing' );
 });
 
 // Render Top-Level NSMI Issue dropdown
@@ -166,15 +159,7 @@ add_action('save_post_nsmi_landing', function($post_id) {
 		}
 	}
 
-	// Sidebar Assignment (reuse logic from laa_sidebar_assignment_meta_box)
-	if (isset($_POST['laa_sidebar_assignment_nonce']) && wp_verify_nonce($_POST['laa_sidebar_assignment_nonce'], 'laa_sidebar_assignment_nonce')) {
-		$assigned_sidebar = isset($_POST['assigned_sidebar']) ? intval($_POST['assigned_sidebar']) : '';
-		if ($assigned_sidebar) {
-			update_post_meta($post_id, '_assigned_sidebar', $assigned_sidebar);
-		} else {
-			delete_post_meta($post_id, '_assigned_sidebar');
-		}
-	}
+	// Sidebar Assignment save is handled by ctlawhelp-sidebars via its generic save_post hook.
 });
 
 // Polylang compatibility: register nsmi_landing CPT with Polylang if available
