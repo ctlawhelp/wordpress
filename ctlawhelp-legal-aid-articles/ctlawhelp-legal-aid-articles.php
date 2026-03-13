@@ -30,7 +30,6 @@ require_once LAA_PATH . 'inc/cpt.php';
 require_once LAA_PATH . 'inc/taxonomy-nsmi.php';
 require_once LAA_PATH . 'inc/taxonomy-nsmi-icons.php';
 require_once LAA_PATH . 'inc/taxonomy-nsmi-admin.php';
-require_once LAA_PATH . 'inc/nsmi-categories-viewer.php';
 require_once LAA_PATH . 'inc/admin-shortcodes-catalog.php';
 
 // Last reviewed date meta box + shortcode

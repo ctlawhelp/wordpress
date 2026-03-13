@@ -49,13 +49,3 @@ add_action('wp_enqueue_scripts', function() {
         '1.0.0'
     );
 });
-
-// Enqueue frontend styles
-add_action('wp_enqueue_scripts', function() {
-    wp_enqueue_style(
-        'laa-sidebars',
-        LAA_SIDEBARS_URL . 'assets/css/sidebars.css',
-        [],
-        '1.0.0'
-    );
-});
