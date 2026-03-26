@@ -106,3 +106,151 @@ Reusable content blocks.
 Gravity Forms privacy utility.
 - Masks PII fields after submission
 - Runs scheduled masking tasks
+
+### Legal Aid Article
+
+A Legal Aid Article is a primarily text-based self-help page on CTLawHelp that explains one complete legal topic or legal task.
+
+Examples:
+- how to represent yourself in an eviction case
+- how to get debt collectors to stop contacting you
+- how to apply for a restraining order
+
+Characteristics:
+- long-form informational content
+- stands on its own
+- may include collapsible sections
+- may include pamphlet links, help blocks, and feedback
+- not primarily interactive
+- distinct from Interactive Guides, which are decision-based tools
+
+Article Structure
+Required
+Title
+Breadcrumbs / category context
+Last reviewed date
+Body (main content)
+Optional
+Pamphlet links
+Attribution (toggleable)
+Global (not part of article model)
+Get Help block (footer/global component)
+Feedback survey (global component below content)
+Article Body Layout
+Articles begin with an intro area using standard Gutenberg blocks.
+The intro appears before any Section blocks.
+The intro is not part of the section system.
+Section blocks are used for all structured content after the intro.
+TOC and accordion behavior apply only to Section blocks, not the intro.
+The intro should be visually distinct using subtle spacing (not a special component).
+Article Sections (Body Builder)
+Articles will be built using a custom Gutenberg Section block.
+Section blocks will be available only for Legal Aid Articles in v1.
+Section Structure
+
+Each Section block:
+
+contains standard Gutenberg blocks (InnerBlocks)
+may optionally begin with a heading block (H2, H3, etc.)
+does not require a separate title field
+Section Title Behavior
+The first heading block within a Section is treated as the section label
+Only the first heading is used for TOC and accordion labels
+Additional headings inside the section are treated as normal content
+If no heading exists, the section has no label and will not appear in the TOC
+Section Usage
+Section blocks are strongly preferred for structured content
+Standard Gutenberg blocks may still be used in v1
+TOC and accordion behavior rely only on Section blocks
+Articles without Section blocks render as standard content without structured navigation features
+Rationale
+allows flexible heading levels (not forced H2)
+supports rich formatting in headings
+keeps editing experience simple and inline
+avoids rigid field-based section systems
+keeps content portable in post_content
+Article Display Controls
+
+Legal Aid Articles support document-level display settings:
+
+Show Table of Contents (on/off)
+Use Accordion Sections (on/off)
+Rules
+These are display settings, not content structure
+They do not change how content is stored
+Section blocks remain the source for section-based behavior
+If sections are not used, TOC/accordion behavior may be unavailable or limited
+Location
+Controlled via document-level settings in the WordPress editor sidebar
+Section Block UI (Editor)
+Visual Design
+Sections should be visually distinct using:
+light border or subtle background
+spacing between sections
+UI should be clear and structured, but not visually heavy
+Structure & Behavior
+Each section displays a non-editable label:
+“Section”
+All content is visible inline:
+no collapsed edit panels
+no hidden content areas
+Editors can:
+add a heading (optional)
+add standard content blocks (paragraphs, lists, images, etc.)
+Movement:
+use native Gutenberg drag and reorder controls
+Empty State Guidance
+“Add a heading (optional)”
+“Start writing…”
+Guiding Principle
+Structure should be visible and intuitive for editors
+Avoid hidden panels, nested editing layers, or form-based content systems
+Prefer inline editing with clear visual grouping
+Balance structure with flexibility — guide, do not over-restrict
+
+Article Body Structure
+
+- Legal Aid Articles should use a structured page layout:
+  - intro area first
+  - Section blocks for all structured content after the intro
+
+- The page/article structure should be controlled to preserve consistency.
+
+- Section contents should remain flexible.
+- Editors may use a wide range of standard content blocks inside sections.
+
+- The system should prefer restricting layout/container blocks at the page level rather than over-restricting content blocks inside sections.
+
+Article Body Structure
+
+- Legal Aid Articles should use a structured page layout:
+  - intro area first
+  - Section blocks for all structured content after the intro
+
+- The page/article structure should be controlled to preserve consistency.
+
+- Section contents should remain flexible.
+- Editors may use a wide range of standard content blocks inside sections.
+
+- The system should prefer restricting layout/container blocks at the page level rather than over-restricting content blocks inside sections.
+
+Migration consideration:
+The article system should support both manual authoring and future Drupal migration. Because Drupal articles are currently composed of ordered segment-like nodes, the Section block model may provide a workable migration target where one Drupal segment maps to one Section block.
+
+Article Display Behavior
+
+Section Headings (Front-End Rendering)
+
+- Each Section block may contain a heading (H2, H3, etc.)
+- The first heading is used as the accordion label (<summary>)
+- To avoid duplicate visible titles:
+  - the heading remains in the DOM
+  - the heading is visually hidden on the front end
+
+Rationale:
+- preserves semantic structure for accessibility and SEO
+- avoids duplicate visible headings in accordion UI
+
+Note:
+- current implementation injects a visually-hidden style into the first heading
+- future refinement may be needed if headings include inline styles

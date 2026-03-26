@@ -36,3 +36,6 @@
 
 !/ctlawhelp-pii-masker/
 !/ctlawhelp-pii-masker/**
+
+!ctlawhelp-section-prototype/
+!ctlawhelp-section-prototype/**
