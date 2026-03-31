@@ -14,6 +14,14 @@ class LATB_NSMI_Protection {
     }
     
     public function init_protection() {
+        // When LATB_DISABLE_NSMI_PROTECTION is true, suppress all protection hooks.
+        // Set this constant in wp-config.php before running a bulk import so the
+        // protection system does not back up stale data and fight the importer.
+        // Unset (or set to false) after import completes.
+        if ( defined( 'LATB_DISABLE_NSMI_PROTECTION' ) && LATB_DISABLE_NSMI_PROTECTION ) {
+            return;
+        }
+
         if ( ! taxonomy_exists( 'nsmi_category' ) ) {
             return;
         }
@@ -453,14 +461,18 @@ class LATB_NSMI_Protection {
     }
 }
 
-// Add custom cron schedule for every minute
-add_filter( 'cron_schedules', function( $schedules ) {
-    $schedules['every_minute'] = array(
-        'interval' => 60,
-        'display'  => 'Every Minute'
-    );
-    return $schedules;
-});
+// Add custom cron schedule for every minute.
+// Skipped when protection is disabled — the only consumer is nsmi_periodic_restore_check,
+// which is suppressed by the early return in init_protection().
+if ( ! defined( 'LATB_DISABLE_NSMI_PROTECTION' ) || ! LATB_DISABLE_NSMI_PROTECTION ) {
+    add_filter( 'cron_schedules', function( $schedules ) {
+        $schedules['every_minute'] = array(
+            'interval' => 60,
+            'display'  => 'Every Minute'
+        );
+        return $schedules;
+    } );
+}
 
 // Initialize the protection system
 new LATB_NSMI_Protection();

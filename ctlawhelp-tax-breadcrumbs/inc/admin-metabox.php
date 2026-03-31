@@ -34,24 +34,10 @@ add_action('add_meta_boxes', function() {
     remove_meta_box('tagsdiv-nsmi_category', 'interactive_guide', 'side');
 }, 99);
 
-// Replace default NSMI category metabox
-add_action( 'add_meta_boxes', function() {
-    if (!taxonomy_exists('nsmi_category')) return;
-    // Remove the default hierarchical checkbox UI
-    remove_meta_box( 'nsmi_categorydiv', 'legal_article', 'side' );
-
-    // Add your custom box
-    foreach (['legal_article', 'post', 'interactive_guide'] as $post_type) {
-        add_meta_box(
-            'nsmi_category_custom',
-            __( 'NSMI Categories', 'ctlawhelp' ),
-            'latb_render_nsmi_category_metabox',
-            $post_type,
-            'side',
-            'default'
-        );
-    }
-});
+// Duplicate add_meta_boxes registration removed.
+// The callback below (priority 10, "Add hidden field for primary category") is the
+// canonical registration. It calls latb_render_nsmi_category_metabox() internally
+// and is the only one that includes the hidden primary_nsmi_category field.
 
 // Remove NSMI Categories panel from Block Editor (Gutenberg)
 add_filter('allowed_block_types_all', function($allowed_blocks, $editor_context) {
@@ -206,6 +192,8 @@ add_action('add_meta_boxes', function() {
             'nsmi_category_custom',
             __( 'NSMI Categories', 'ctlawhelp' ),
             function($post) {
+                // Nonce bound to this specific post ID so it cannot be replayed across posts.
+                wp_nonce_field( 'nsmi_primary_save_' . $post->ID, 'nsmi_primary_nonce' );
                 echo '<div class="inside" style="padding:0 !important;">';
                 latb_render_nsmi_category_metabox($post);
                 $primary = get_post_meta($post->ID, '_primary_nsmi_category', true);
@@ -219,12 +207,60 @@ add_action('add_meta_boxes', function() {
     }
 });
 
-// Save the primary category selection
-add_action('save_post', function($post_id){
-    if (!taxonomy_exists('nsmi_category')) return;
-    if(isset($_POST['primary_nsmi_category']) && $_POST['primary_nsmi_category'] !== ''){
-        update_post_meta($post_id, '_primary_nsmi_category', intval($_POST['primary_nsmi_category']));
-    } else {
-        delete_post_meta($post_id, '_primary_nsmi_category');
+// Save the primary category selection.
+//
+// IMPORTER NOTE: _primary_nsmi_category stores a WordPress term_id (integer), not a
+// Drupal term ID. During import, match Drupal NSMI terms to existing WP nsmi_category
+// terms by name. Unmatched terms should be skipped and logged by the importer, not
+// created on the fly. Always call wp_set_object_terms() to assign taxonomy terms
+// before writing this meta, because the server-side validation below checks assigned
+// terms to verify the submitted primary is valid.
+add_action( 'save_post', function( $post_id ) {
+    // Guard: skip revisions and autosaves — neither submits this metabox.
+    if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+        return;
     }
-});
+
+    // Guard: only act when the metabox was actually part of this request.
+    // Programmatic saves (wp_insert_post, REST API, importer) will not have this
+    // nonce field, so they pass through without touching _primary_nsmi_category.
+    if ( ! isset( $_POST['nsmi_primary_nonce'] ) ) {
+        return;
+    }
+
+    // Guard: verify nonce — prevents CSRF and confirms the submission is genuine.
+    if ( ! wp_verify_nonce( $_POST['nsmi_primary_nonce'], 'nsmi_primary_save_' . $post_id ) ) {
+        return;
+    }
+
+    // Guard: capability check.
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+
+    if ( ! taxonomy_exists( 'nsmi_category' ) ) {
+        return;
+    }
+
+    $submitted = $_POST['primary_nsmi_category'];
+
+    // Empty string means the user explicitly deselected the primary via the UI — honour it.
+    if ( $submitted === '' ) {
+        delete_post_meta( $post_id, '_primary_nsmi_category' );
+        return;
+    }
+
+    $primary_id = intval( $submitted );
+
+    // Server-side validation: the submitted primary must be one of the terms currently
+    // assigned to this post. WP core processes tax_input[] before save_post fires, so
+    // wp_get_object_terms() reflects the just-saved taxonomy state.
+    $assigned = wp_get_object_terms( $post_id, 'nsmi_category', [ 'fields' => 'ids' ] );
+    if ( is_wp_error( $assigned ) || ! in_array( $primary_id, $assigned, true ) ) {
+        // Submitted primary is not an assigned term. Do not save it, and do not delete
+        // the existing value — leave the previous primary intact as a safe fallback.
+        return;
+    }
+
+    update_post_meta( $post_id, '_primary_nsmi_category', $primary_id );
+} );

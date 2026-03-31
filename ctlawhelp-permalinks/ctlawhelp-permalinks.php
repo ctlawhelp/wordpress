@@ -104,9 +104,14 @@ class LegalPermalinks {
     /** ---------- Flush Triggers ---------- */
     public function flush_on_category_change($object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids) {
         $post_type = get_post_type($object_id);
-        
-        // Always flush for NSMI category changes on legal content (affects automatic URLs)
+
+        // Flush for NSMI category changes on legal content — but only when the post
+        // uses an automatic (taxonomy-derived) URL. If _legal_custom_path is set the
+        // canonical URL is fixed and taxonomy changes cannot affect it.
         if ($taxonomy === 'nsmi_category' && in_array($post_type, ['legal_article', 'interactive_guide'], true)) {
+            if ( get_post_meta( $object_id, '_legal_custom_path', true ) ) {
+                return; // Custom path is canonical; taxonomy change has no URL effect.
+            }
             sort($tt_ids);
             sort($old_tt_ids);
             if ($tt_ids !== $old_tt_ids) {
@@ -130,8 +135,12 @@ class LegalPermalinks {
     }
 
     public function immediate_flush_on_save($post_id) {
+        if ( defined( 'LATB_DISABLE_PERMALINK_FLUSH' ) && LATB_DISABLE_PERMALINK_FLUSH ) {
+            return;
+        }
+
         $post_type = get_post_type($post_id);
-        
+
         // Only flush for supported post types
         if (!in_array($post_type, ['post', 'page', 'legal_article', 'interactive_guide', 'nsmi_landing'], true)) {
             return;
@@ -147,9 +156,18 @@ class LegalPermalinks {
 
     /** ---------- Primary Category Change Handler ---------- */
     public function flush_on_primary_category_change($meta_id, $post_id, $meta_key, $meta_value) {
+        if ( defined( 'LATB_DISABLE_PERMALINK_FLUSH' ) && LATB_DISABLE_PERMALINK_FLUSH ) {
+            return;
+        }
         if ($meta_key === '_primary_nsmi_category') {
             $post_type = get_post_type($post_id);
             if (in_array($post_type, ['legal_article', 'interactive_guide'], true)) {
+                // If the post already has a custom path, its canonical URL is fixed.
+                // Changing the primary NSMI category affects breadcrumbs only, not the
+                // URL — no cache rebuild needed.
+                if ( get_post_meta( $post_id, '_legal_custom_path', true ) ) {
+                    return;
+                }
                 self::$needs_flush = true;
                 $this->invalidate_rules_cache();
                 if (!wp_next_scheduled('legal_permalinks_flush_rules')) {
@@ -247,10 +265,12 @@ class LegalPermalinks {
             update_post_meta($post_id, '_legal_redirect_paths', $lines);
         }
 
-        // Invalidate cache and schedule a rebuild
+        // Invalidate cache and schedule a rebuild (both suppressed during import).
         $this->invalidate_rules_cache();
-        if (!wp_next_scheduled('legal_permalinks_flush_rules')) {
-            wp_schedule_single_event(time() + 1, 'legal_permalinks_flush_rules');
+        if ( ! defined( 'LATB_DISABLE_PERMALINK_FLUSH' ) || ! LATB_DISABLE_PERMALINK_FLUSH ) {
+            if ( ! wp_next_scheduled( 'legal_permalinks_flush_rules' ) ) {
+                wp_schedule_single_event( time() + 1, 'legal_permalinks_flush_rules' );
+            }
         }
     }
 
@@ -292,37 +312,48 @@ class LegalPermalinks {
         }
         
         $path_parts = [];
-        
-        // Try to get NSMI categories first (works for all post types)
-        $primary_id = (int) get_post_meta($post->ID, '_primary_nsmi_category', true);
-        $nsmi_terms = get_the_terms($post->ID, 'nsmi_category');
-        
 
-        
-        if ($primary_id) {
-            // Use primary NSMI category
-            $primary = get_term($primary_id, 'nsmi_category');
-            if ($primary && !is_wp_error($primary)) {
-                $ancestors = array_reverse(get_ancestors($primary->term_id, 'nsmi_category', 'taxonomy'));
-                foreach ($ancestors as $ancestor_id) {
-                    $ancestor = get_term($ancestor_id, 'nsmi_category');
-                    if ($ancestor && !is_wp_error($ancestor)) {
+        // IMPORTER NOTE: _primary_nsmi_category holds a WordPress term_id (integer).
+        // During import, map Drupal NSMI term names to existing WP nsmi_category terms.
+        // Unmatched terms must be skipped and logged by the importer — do not create
+        // new terms here. Always assign taxonomy terms via wp_set_object_terms() before
+        // writing this meta so the save_post validation in admin-metabox.php can verify
+        // the primary is one of the assigned terms.
+        $primary_id = (int) get_post_meta( $post->ID, '_primary_nsmi_category', true );
+
+        if ( $primary_id ) {
+            $primary = get_term( $primary_id, 'nsmi_category' );
+            if ( $primary && ! is_wp_error( $primary ) ) {
+                $ancestors = array_reverse( get_ancestors( $primary->term_id, 'nsmi_category', 'taxonomy' ) );
+                foreach ( $ancestors as $ancestor_id ) {
+                    $ancestor = get_term( $ancestor_id, 'nsmi_category' );
+                    if ( $ancestor && ! is_wp_error( $ancestor ) ) {
                         $path_parts[] = $ancestor->slug;
                     }
                 }
                 $path_parts[] = $primary->slug;
+            } else {
+                // Term ID is stored but the term no longer exists — log and fall through
+                // to slug-only path rather than producing a broken URL.
+                error_log( sprintf(
+                    'ctlawhelp-permalinks: post %d has _primary_nsmi_category=%d but term not found; generating slug-only path.',
+                    $post->ID,
+                    $primary_id
+                ) );
             }
-        } elseif (!empty($nsmi_terms) && !is_wp_error($nsmi_terms)) {
-            // Use first NSMI category if no primary is set
-            $first_term = $nsmi_terms[0];
-            $ancestors = array_reverse(get_ancestors($first_term->term_id, 'nsmi_category', 'taxonomy'));
-            foreach ($ancestors as $ancestor_id) {
-                $ancestor = get_term($ancestor_id, 'nsmi_category');
-                if ($ancestor && !is_wp_error($ancestor)) {
-                    $path_parts[] = $ancestor->slug;
-                }
+        } else {
+            // No primary set. For legal_article and interactive_guide this means the
+            // content was saved without a primary category, which produces a bare
+            // lang/slug URL. Log so the issue is detectable without being fatal.
+            if ( in_array( $post->post_type, [ 'legal_article', 'interactive_guide' ], true ) ) {
+                error_log( sprintf(
+                    'ctlawhelp-permalinks: post %d (%s) has no _primary_nsmi_category set; generating slug-only path.',
+                    $post->ID,
+                    $post->post_type
+                ) );
             }
-            $path_parts[] = $first_term->slug;
+            // Other post types (post, page, nsmi_landing) do not require a primary —
+            // no log needed for them.
         }
         
         // Add the post slug at the end
@@ -355,14 +386,20 @@ class LegalPermalinks {
             return $permalink;
         }
         
-        // Handle custom path override first (always gets language prefix)
+        // _legal_custom_path is canonical: when set it is always the live URL.
+        // Changing NSMI taxonomy or _primary_nsmi_category on a post with a custom
+        // path affects breadcrumbs only — the URL does not change. (The flush
+        // triggers in flush_on_category_change() and flush_on_primary_category_change()
+        // enforce this contract by skipping cache invalidation for these posts.)
         $custom = get_post_meta($post->ID, '_legal_custom_path', true);
         if ($custom) {
             $custom_with_lang = $this->add_language_prefix(trim($custom, '/'), $post);
             return home_url('/' . $custom_with_lang);
         }
-        
-        // Apply automatic URL generation to ALL post types
+
+        // No custom path — derive URL automatically from NSMI taxonomy + post slug.
+        // Automatic path generation is the fallback for posts that do not yet have
+        // _legal_custom_path set. It is driven solely by _primary_nsmi_category.
         $path = $this->build_automatic_path($post);
         if ($path) {
             return home_url("/$path");
@@ -485,6 +522,13 @@ class LegalPermalinks {
 
     /** ---------- Invalidate Rules Cache ---------- */
     private function invalidate_rules_cache() {
+        // When LATB_DISABLE_PERMALINK_FLUSH is true, skip cache invalidation so that
+        // bulk imports do not trigger hundreds of rebuild cycles. Set this constant in
+        // wp-config.php before import; run `wp option delete legal_permalinks_rules_map`
+        // and `wp rewrite flush` once after import completes.
+        if ( defined( 'LATB_DISABLE_PERMALINK_FLUSH' ) && LATB_DISABLE_PERMALINK_FLUSH ) {
+            return;
+        }
         delete_option( 'legal_permalinks_rules_map' );
     }
 
